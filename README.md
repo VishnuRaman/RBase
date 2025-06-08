@@ -1,6 +1,6 @@
-# RedBase: An HBase-like Database in Rust
+# RBase: An HBase-like Database in Rust
 
-RedBase is a lightweight implementation of an HBase-like distributed database system written in Rust. It provides a simplified but functional subset of Apache HBase's features, focusing on core functionality while maintaining a clean, memory-safe implementation.
+RBase is a lightweight implementation of an HBase-like distributed database system written in Rust. It provides a simplified but functional subset of Apache HBase's features, focusing on core functionality while maintaining a clean, memory-safe implementation.
 
 ## Table of Contents
 
@@ -34,7 +34,7 @@ RedBase is a lightweight implementation of an HBase-like distributed database sy
 
 ## Overview
 
-RedBase implements a columnar storage system with:
+RBase implements a columnar storage system with:
 - Tables and Column Families
 - Multi-Version Concurrency Control (MVCC)
 - Tombstone markers for deleted data with TTL
@@ -43,7 +43,7 @@ RedBase implements a columnar storage system with:
 
 ## Architecture
 
-RedBase follows a similar architecture to HBase with some simplifications:
+RBase follows a similar architecture to HBase with some simplifications:
 
 - **MemStore**: In-memory storage with Write-Ahead Log (WAL) for durability
 - **SSTable**: Immutable on-disk storage format for persisted data
@@ -54,7 +54,7 @@ RedBase follows a similar architecture to HBase with some simplifications:
 
 ### Features Consistent with HBase
 
-RedBase implements the following features that are consistent with Apache HBase:
+RBase implements the following features that are consistent with Apache HBase:
 
 1. **Data Model**
    - Tables containing Column Families
@@ -101,7 +101,7 @@ RedBase implements the following features that are consistent with Apache HBase:
 
 ### Features Missing Compared to HBase
 
-RedBase is a simplified implementation and lacks several features present in Apache HBase:
+RBase is a simplified implementation and lacks several features present in Apache HBase:
 
 1. **Distributed Architecture**
    - No RegionServers or distributed storage
@@ -143,8 +143,8 @@ RedBase is a simplified implementation and lacks several features present in Apa
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/RedBase.git
-cd RedBase
+git clone https://github.com/yourusername/RBase.git
+cd RBase
 
 # Build the project
 cargo build --release
@@ -152,11 +152,11 @@ cargo build --release
 
 ## Basic Usage
 
-Here's a simple example of using RedBase:
+Here's a simple example of using RBase:
 
 ```rust
 use std::path::Path;
-use RedBase::api::Table;
+use RBase::api::Table;
 
 fn main() -> std::io::Result<()> {
     // Create a table with a column family
@@ -190,7 +190,7 @@ fn main() -> std::io::Result<()> {
     cf.compact()?;
 
     // Use advanced filters
-    use RedBase::filter::{Filter, FilterSet};
+    use RBase::filter::{Filter, FilterSet};
 
     // Simple filter
     let filter = Filter::Equal(b"value1".to_vec());
@@ -207,7 +207,7 @@ fn main() -> std::io::Result<()> {
     let scan_result = cf.scan_row_with_filter(b"row1", &filter_set)?;
 
     // Use aggregations
-    use RedBase::aggregation::{AggregationType, AggregationSet};
+    use RBase::aggregation::{AggregationType, AggregationSet};
 
     // Create an aggregation set
     let mut agg_set = AggregationSet::new();
@@ -226,7 +226,7 @@ fn main() -> std::io::Result<()> {
 
 ## Creating Tables and Column Families
 
-Tables in RedBase are directories on disk, and column families are subdirectories within a table directory.
+Tables in RBase are directories on disk, and column families are subdirectories within a table directory.
 
 ```rust
 // Open a table (creates the directory if it doesn't exist)
@@ -253,7 +253,7 @@ let posts_cf = table.cf("posts").unwrap();
 
 ## Writing Data
 
-Data in RedBase is organized by row key, column name, and timestamp. Each write operation automatically assigns a timestamp based on the current time.
+Data in RBase is organized by row key, column name, and timestamp. Each write operation automatically assigns a timestamp based on the current time.
 
 ### Single Column Put
 
@@ -274,7 +274,7 @@ cf.put(b"user1".to_vec(), b"name".to_vec(), b"John Smith".to_vec())?;
 For efficiency, you can write multiple columns to the same row in a single operation using the `Put` object:
 
 ```rust
-use RedBase::api::Put;
+use RBase::api::Put;
 
 // Create a Put operation for a specific row
 let mut put = Put::new(b"user1".to_vec());
@@ -292,7 +292,7 @@ This is more efficient than calling `put` multiple times, especially when writin
 
 ## Reading Data
 
-RedBase provides several ways to read data:
+RBase provides several ways to read data:
 
 ### Get the Latest Value
 
@@ -319,7 +319,7 @@ for (timestamp, value) in name_versions {
 For more advanced read operations, you can use the `Get` object, which is similar to the HBase/Java Get API:
 
 ```rust
-use RedBase::api::Get;
+use RBase::api::Get;
 
 // Create a Get operation for a specific row
 let mut get = Get::new(b"user1".to_vec());
@@ -358,7 +358,7 @@ The `Get` object provides more control over the read operation, allowing you to:
 For more advanced read operations, you can use the `Get` object, which is similar to the HBase/Java Get API:
 
 ```rust
-use RedBase::api::Get;
+use RBase::api::Get;
 
 // Create a Get operation for a specific row
 let mut get = Get::new(b"user1".to_vec());
@@ -394,7 +394,7 @@ The `Get` object provides more control over the read operation, allowing you to:
 
 ## Deleting Data
 
-Deleting data in RedBase creates a tombstone marker:
+Deleting data in RBase creates a tombstone marker:
 
 ```rust
 // Delete a value (creates a tombstone with no TTL)
@@ -412,7 +412,7 @@ After the TTL expires, the tombstone can be removed during compaction. Until the
 
 ## Scanning Data
 
-RedBase allows you to scan all columns for a specific row:
+RBase allows you to scan all columns for a specific row:
 
 ```rust
 // Scan all columns for a row, getting up to 10 versions per column
@@ -427,14 +427,14 @@ for (column, versions) in row_data {
 
 ## Flushing and Compaction
 
-RedBase uses a MemStore for in-memory storage before flushing to disk. By default, the MemStore is flushed to disk when it reaches 10,000 entries. You can manually flush the MemStore:
+RBase uses a MemStore for in-memory storage before flushing to disk. By default, the MemStore is flushed to disk when it reaches 10,000 entries. You can manually flush the MemStore:
 
 ```rust
 // Flush the MemStore to disk
 cf.flush()?;
 ```
 
-Compaction is the process of merging multiple SSTables and optionally removing old versions or expired tombstones. RedBase supports several compaction strategies:
+Compaction is the process of merging multiple SSTables and optionally removing old versions or expired tombstones. RBase supports several compaction strategies:
 
 ```rust
 // Default compaction (minor compaction)
@@ -453,7 +453,7 @@ cf.compact_with_max_age(3600 * 1000)?;
 You can also use custom compaction options:
 
 ```rust
-use RedBase::api::{CompactionOptions, CompactionType};
+use RBase::api::{CompactionOptions, CompactionType};
 
 // Custom compaction options
 let options = CompactionOptions {
@@ -465,13 +465,13 @@ let options = CompactionOptions {
 cf.compact_with_options(options)?;
 ```
 
-RedBase runs a background compaction thread every 60 seconds, but you can also trigger compaction manually as shown above.
+RBase runs a background compaction thread every 60 seconds, but you can also trigger compaction manually as shown above.
 
 ## Advanced Features
 
 ### Multi-Version Concurrency Control
 
-RedBase implements MVCC (Multi-Version Concurrency Control) which allows it to maintain multiple versions of data. Each write operation creates a new version with a timestamp, and read operations can retrieve specific versions.
+RBase implements MVCC (Multi-Version Concurrency Control) which allows it to maintain multiple versions of data. Each write operation creates a new version with a timestamp, and read operations can retrieve specific versions.
 
 ```rust
 // Write multiple versions
@@ -492,7 +492,7 @@ println!("Latest value: {}", String::from_utf8_lossy(&latest.unwrap()));
 
 ### Tombstones and TTL
 
-When you delete data in RedBase, it creates a tombstone marker rather than immediately removing the data. Tombstones can have an optional Time-To-Live (TTL) after which they are eligible for removal during compaction.
+When you delete data in RBase, it creates a tombstone marker rather than immediately removing the data. Tombstones can have an optional Time-To-Live (TTL) after which they are eligible for removal during compaction.
 
 ```rust
 // Delete with no TTL (tombstone never expires automatically)
@@ -507,10 +507,10 @@ cf.delete_with_ttl(b"row1".to_vec(), b"col2".to_vec(), Some(3600 * 1000))?;
 
 ### Filtering
 
-RedBase supports filtering data based on various predicates:
+RBase supports filtering data based on various predicates:
 
 ```rust
-use RedBase::filter::{Filter, FilterSet};
+use RBase::filter::{Filter, FilterSet};
 
 // Simple filter: get a value that equals a specific value
 let filter = Filter::Equal(b"John Doe".to_vec());
@@ -560,10 +560,10 @@ Available filter types:
 
 ### Aggregation
 
-RedBase supports aggregation operations on data:
+RBase supports aggregation operations on data:
 
 ```rust
-use RedBase::aggregation::{AggregationType, AggregationSet};
+use RBase::aggregation::{AggregationType, AggregationSet};
 
 // Create an aggregation set
 let mut agg_set = AggregationSet::new();
@@ -601,15 +601,15 @@ Available aggregation types:
 
 ## Advanced Client Features
 
-RedBase provides several advanced client features that are similar to those found in HBase:
+RBase provides several advanced client features that are similar to those found in HBase:
 
 ### Asynchronous API
 
-RedBase provides an asynchronous API that allows you to interact with the database without blocking the current thread. This is particularly useful for applications that need to handle multiple concurrent requests.
+RBase provides an asynchronous API that allows you to interact with the database without blocking the current thread. This is particularly useful for applications that need to handle multiple concurrent requests.
 
 ```rust
 use std::path::Path;
-use RedBase::async_api::Table;
+use RBase::async_api::Table;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -647,8 +647,8 @@ async fn main() -> std::io::Result<()> {
 Batch operations allow you to perform multiple operations in a single transaction, which is more efficient than performing them one by one.
 
 ```rust
-use RedBase::api::Table;
-use RedBase::batch::{Batch, SyncBatchExt};
+use RBase::api::Table;
+use RBase::batch::{Batch, SyncBatchExt};
 
 fn main() -> std::io::Result<()> {
     let mut table = Table::open("./data/my_table")?;
@@ -680,7 +680,7 @@ fn main() -> std::io::Result<()> {
 Connection pooling allows you to efficiently reuse connections to the database, which is important for performance in multi-user scenarios.
 
 ```rust
-use RedBase::pool::SyncConnectionPool;
+use RBase::pool::SyncConnectionPool;
 
 fn main() -> std::io::Result<()> {
     // Create a connection pool with 10 connections
@@ -710,10 +710,10 @@ fn main() -> std::io::Result<()> {
 
 ### REST Interface [NOT READY]
 
-RedBase provides a REST API that allows you to interact with the database over HTTP. This is useful for web applications and microservices.
+RBase provides a REST API that allows you to interact with the database over HTTP. This is useful for web applications and microservices.
 
 ```rust
-use RedBase::rest::{RestConfig, start_server};
+use RBase::rest::{RestConfig, start_server};
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
