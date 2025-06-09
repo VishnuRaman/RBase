@@ -30,7 +30,6 @@ RBase is a lightweight implementation of an HBase-like distributed database syst
   - [Time Series Data](#time-series-data)
 - [Testing](#testing)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 
